@@ -162,4 +162,4 @@ cython_debug/
 bin/
 include/
 lib/
-*.cfgpip
+*.cfg   
