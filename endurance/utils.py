@@ -222,3 +222,84 @@ class BikePackingScraper:
         # Concatenate all DataFrames in the list into a single DataFrame
         df_endurance = pd.concat(self.data_frames_list, ignore_index=True)
         return df_endurance
+    
+class DotWatcherScraper:
+    def __init__(self, links_list):
+        self.links_list = links_list
+        self.data_frames_list = []
+
+    async def main(self, url):
+        browser = await launch()
+        page = await browser.newPage()
+        await page.goto(url, {'timeout': 60000})
+
+        # Get html
+        html = await page.content()
+        await browser.close()
+        return html
+
+    def scrape_data(self):
+        for i in range(len(self.links_list)):
+            print(f'Getting info from:', self.links_list[i])
+            url = self.links_list[i]
+            url_dict = {'Link': url}
+
+            # Get soup object
+            html_response = asyncio.get_event_loop().run_until_complete(self.main(url))
+            soup = BeautifulSoup(html_response, 'html.parser')
+
+            # Get the race
+            race = soup.find('h1').text
+            race_dict = {'Race': race}
+
+            different_structure_links = ['https://dotwatcher.cc/feature/bikes-of-basajaun-2023',
+                                         'https://dotwatcher.cc/feature/bikes-of-log-drivers-waltz-2023',
+                                         'https://dotwatcher.cc/feature/bikes-of-the-ardennes-monster-2023']
+
+            if any(link in url for link in different_structure_links):
+                div_elements = soup.find_all('div', class_='sc-30963e4a-4 fXZkBS')
+            else:
+                div_elements = soup.find_all('div', class_='sc-30963e4a-5 gYOzwm')
+
+            bike_list = []
+            bike_dict = {}
+
+            for div_element in div_elements:
+                paragraphs = div_element.find_all('p')
+                for paragraph in paragraphs:
+                    strong_element = paragraph.find('strong')
+                    if strong_element:
+                        bike_dict[strong_element.text] = paragraph.text
+                        bike_dict.update(race_dict)
+                        bike_dict.update(url_dict)
+
+                bike_list.append(bike_dict.copy())
+
+            df_output = pd.DataFrame(bike_list)
+
+            columns_to_remove_string = ['Name', 'Race', 'Bike', 'Age', 'Location', 'Key items of kit', 'Cap number']
+
+            strings_to_remove = {'Name': 'Name:',
+                                'Race': 'Bikes of ',
+                                'Bike': 'Bike:',
+                                'Location': 'Location:',
+                                'Age': 'Age:',
+                                'Key items of kit': 'Key items of kit:',
+                                'Cap number': 'Cap number:'}
+
+            for column in columns_to_remove_string:
+                try:
+                    df_output[column] = self.remove_string(df_output[column], strings_to_remove[column])
+                except KeyError:
+                    df_output[column] = np.nan
+
+            df_output['Country'] = df_output['Location'].str.split(',').str[1].str.strip()
+
+            df_iteration = df_output.dropna(how='all')
+            self.data_frames_list.append(df_iteration)
+
+        return pd.concat(self.data_frames_list, ignore_index=True)
+
+    @staticmethod
+    def remove_string(column, string_to_remove):
+        return column.str.lstrip(string_to_remove).str.strip()
