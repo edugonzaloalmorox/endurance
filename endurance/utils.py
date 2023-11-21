@@ -22,6 +22,7 @@ class RaceLinksScraperBikepacking:
         return html
 
     def scrape_bikepacking_links(self, url):
+        
         html_response = asyncio.get_event_loop().run_until_complete(self.fetch_html(url))
         soup = BeautifulSoup(html_response, 'html.parser')
         ul_element = soup.find('ul', class_='postlist')
@@ -36,6 +37,7 @@ class RaceLinksScraperBikepacking:
         self.links_races.append(link_list)
 
     def run_scraper(self, base_url, num_pages):
+        print('Starting bikepakcing links scraper...')
         for i in range(1, num_pages + 1):
             url = f'{base_url}/page/{i}/'
             self.scrape_bikepacking_links(url)
@@ -58,6 +60,7 @@ class RaceLinkScraperDotwatcher:
         return html
 
     def scrape_dotwatcher_links(self, base_url, num_pages):
+        print('Starting dotwatcher links scraper...')
         for i in range(1, num_pages + 1):
             url = f'{base_url}?page={i}'
             html_response = asyncio.get_event_loop().run_until_complete(self.fetch_html(url))

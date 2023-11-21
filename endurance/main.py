@@ -15,7 +15,7 @@ result_links_bikepacking = scraper_bikepacking.run_scraper(base_url_bikepacking,
 # Dotwatcher.cc
 scraper_dotwatcher = RaceLinkScraperDotwatcher()
 base_url_dotwatcher = 'https://dotwatcher.cc/features/bikes-of'
-num_pages_dotwatcher = 4
+num_pages_dotwatcher = 3
 result_links_dotwatcher = scraper_dotwatcher.run_scraper(base_url_dotwatcher, num_pages_dotwatcher)
 
 
@@ -37,9 +37,15 @@ dotwatch_lst = [item for item in result_links_dotwatcher if item not in ['https:
                                                            'https://dotwatcher.cc/feature/bikes-of-heading-southwest-2022', 
                                                            'https://dotwatcher.cc/feature/bikes-of-ggag-2022', 
                                                            'https://dotwatcher.cc/feature/bikes-of-granguanche-audax-trail',
-                                                           'https://dotwatcher.cc/feature/bikes-of-across-andes-2021']]
+                                                           'https://dotwatcher.cc/feature/bikes-of-across-andes-2021', 
+                                                            'https://dotwatcher.cc/feature/bikes-of-two-volcano-sprint-2021', 
+                                                            'https://dotwatcher.cc/feature/bikes-of-race-through-poland-2021',
+                                                            'https://dotwatcher.cc/feature/bikes-of-transiberica-2021',
+                                                            'https://dotwatcher.cc/feature/bikes-of-great-british-divide-2021',
+                                                            'https://dotwatcher.cc/feature/bikes-of-the-transatlantic-way-2021',
+                                                            '']]
 
 scraper = DotWatcherScraper(dotwatch_lst)
-result_dataframe = scraper.scrape_data()
-
+dotwatch_df= scraper.scrape_data()
+dotwatch_df.to_csv('notebooks/data/dotwatcher.csv', index=False)
 
