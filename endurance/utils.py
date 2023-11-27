@@ -7,6 +7,7 @@ import pandas as pd
 import nest_asyncio
 import re
 import numpy as np
+import os
 
 
 class RaceLinksScraperBikepacking:
@@ -1072,3 +1073,61 @@ class DataProcessor:
 
         return self.df_final
 
+# Collate the bike output ----- 
+
+def load_and_collate_results(folder_path):
+    all_json_data = []
+
+    # Get a sorted list of files in the folder
+    files_to_process = sorted(
+        (filename for filename in os.listdir(folder_path) if filename.startswith('output_results_') and filename.endswith('.json')),
+        key=lambda x: int(x.split('_')[2].split('.')[0])  # Extract and sort by the numeric part of the file name
+    )
+
+    # Iterate over the sorted files
+    for filename in files_to_process:
+        file_path = os.path.join(folder_path, filename)
+        with open(file_path, 'r') as file:
+            json_data = json.load(file)
+            all_json_data.append(json_data)
+
+    collated_data = [json_string for sublist in all_json_data for json_string in sublist]
+    return collated_data
+
+
+def convert_json_to_df(list_data):
+
+
+    bike_brands = []
+    bike_models = []
+    wheels = []
+    gears = []
+    speeds = []
+    tyres = []
+    tyre_sizes = []
+    lights = []
+
+    # Iterate through each JSON entry and extract values for each column
+    for json_entry in list_data:
+        json_data = eval(json_entry)  # Convert the string to a dictionary
+        bike_brands.append(json_data.get("Bike brand", ""))
+        bike_models.append(json_data.get("Bike model", ""))
+        wheels.append(json_data.get("Wheels", ""))
+        gears.append(json_data.get("Gears", ""))
+        speeds.append(json_data.get("Speeds", ""))
+        tyres.append(json_data.get("Tyres", ""))
+        tyre_sizes.append(json_data.get("Size Tyre", ""))
+        lights.append(json_data.get("Lights", ""))
+
+    df = pd.DataFrame({
+        'bike_brand': bike_brands,
+        'bike_model': bike_models,
+        'wheels': wheels,
+        'gears': gears,
+        'speeds': speeds,
+        'tyres': tyres,
+        'tyre_size': tyre_sizes,
+        'lights': lights
+    })
+
+    return df   
