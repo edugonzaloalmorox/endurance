@@ -132,12 +132,38 @@ def run_in_batches(bike_list, batch_size=25):
 
 
 
+def process_and_save_results(list_to_subset, batch_size, start_index, end_index):
+    
+    bikes_subset = list_to_subset[start_index:end_index]
+    
+    output_results = run_in_batches(bikes_subset, batch_size)
+    
+    output_file_path = f'results/output_results_{start_index}{end_index}.json'
+    
+    with open(output_file_path, 'w') as f:
+        json.dump(output_results, f) 
+    
+    print(f'Results for bikes {start_index} to {end_index} saved to {output_file_path}')
+
 
 
 print('Processing completions...')
 
+
 bike_list = df_2023['bike'].tolist()
-bikes_test = bike_list[0:50]
+batch_size = 25
+
+# Set the desired range of indices
+start_index = 751
+end_index = 800
+
+process_and_save_results(bike_list, batch_size, start_index, end_index)
+
+
+
+'''
+bike_list = df_2023['bike'].tolist()
+bikes_test = bike_list[601:650]
 output_results = run_in_batches(bikes_test, batch_size=25)
 
 print('Print results...')
@@ -146,6 +172,7 @@ print(output_results)
 
 # save output as output_results as json file
 
-with open(f'results/output_results_{1_50}.json', 'w') as f:
+with open(f'results/output_results_{601_650}.json', 'w') as f:
     json.dump(output_results, f)
 
+'''
