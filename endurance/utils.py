@@ -314,9 +314,9 @@ class DotWatcherScraper:
 class DataProcessor:
     def __init__(self, bikepacking_file, dotwatch_file):
         print("Load Bikepacking file.... ")
-        self.bikepacking = pd.read_csv(f'notebooks/data/{bikepacking_file}')
+        self.bikepacking = pd.read_csv(f'data/processed/{bikepacking_file}')
         print("Load Dotwatch file.... '")
-        self.dotwatch = pd.read_csv(f'notebooks/data/{dotwatch_file}')
+        self.dotwatch = pd.read_csv(f'data/processed/{dotwatch_file}')
 
     def tidy_bikepacking_data(self):
         print("Tidy Bikepacking file.... ")

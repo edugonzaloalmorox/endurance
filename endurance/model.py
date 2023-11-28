@@ -1,8 +1,5 @@
 import pandas as pd
 import numpy as np
-from skimpy import skim
-pd.set_option('display.max_columns', None)
-
 from dotenv import load_dotenv
 import os
 import json
@@ -10,6 +7,7 @@ import concurrent.futures
 from openai import OpenAI, OpenAIError, RateLimitError
 import backoff
 
+pd.set_option('display.max_columns', None)
 
 load_dotenv()
 OpenAI.api_key = os.getenv("OPENAI_API_KEY")
@@ -17,10 +15,10 @@ client = OpenAI()
 print('Client created')
 
 
-print('Loading data...')
-df = pd.read_csv('notebooks/data/endurance_complete.csv')
-df_2023 = df[df['year']==2023]
 
+df = pd.read_csv('data/processed/endurance_complete.csv')
+df_2023 = df[df['year']==2023]
+print('Loading data...')
 
 
 print('Loading prompts...')
@@ -28,12 +26,6 @@ prompt = "You are a helpful assistant of a bike shop that speaks only in JSON. D
 
 
 print('Creating completions...')
-
-import os
-import json
-import concurrent.futures
-from openai import OpenAI, OpenAIError, RateLimitError
-import backoff
 
 
 @backoff.on_exception(backoff.expo, RateLimitError)
@@ -78,7 +70,7 @@ def process_single_bike(bike_text):
 
 def process_bike_info_test_parallel(bike_list, race_to_filter=None):
     # Create a directory to save the results
-    save_directory = 'results'
+    save_directory = 'data/input/results'
     os.makedirs(save_directory, exist_ok=True)
 
     responses_list = []
@@ -93,7 +85,7 @@ def process_bike_info_test_parallel(bike_list, race_to_filter=None):
             for i in range(0, len(results), chunk_size):
                 chunk = results[i:i + chunk_size]
                 file_num = i // chunk_size + 1
-                file_path = os.path.join(save_directory, f'results_{file_num}.json')
+                file_path = os.path.join(save_directory, f'data/input/results_{file_num}.json')
                 with open(file_path, 'w') as f:
                     json.dump(chunk, f)
 
@@ -138,7 +130,7 @@ def process_and_save_results(list_to_subset, batch_size, start_index, end_index)
     
     output_results = run_in_batches(bikes_subset, batch_size)
     
-    output_file_path = f'results/output_results_{start_index}{end_index}.json'
+    output_file_path = f'data/input/results/output_results_{start_index}{end_index}.json'
     
     with open(output_file_path, 'w') as f:
         json.dump(output_results, f)    

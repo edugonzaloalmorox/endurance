@@ -10,7 +10,10 @@ import os
 # Example usage
 processor = DataProcessor('bikepacking.csv', 'dotwatcher.csv')
 final_data = processor.process_data()
-final_data.to_csv('notebooks/data/endurance_complete.csv', index=False)
+print(final_data.head())
+final_data.to_csv('data/processed/endurance_complete.csv', index=False)
+
+
 
 
 
