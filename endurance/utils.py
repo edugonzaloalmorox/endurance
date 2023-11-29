@@ -1094,11 +1094,11 @@ def load_and_collate_results(folder_path):
     collated_data = [json_string for sublist in all_json_data for json_string in sublist]
     return collated_data
 
-
 def convert_json_to_df(list_data):
 
-
-    bike_brands = []
+     # Initialize empty lists for each column
+    bike_texts = []
+    bike_brand = []
     bike_models = []
     wheels = []
     gears = []
@@ -1107,27 +1107,36 @@ def convert_json_to_df(list_data):
     tyre_sizes = []
     lights = []
 
-    # Iterate through each JSON entry and extract values for each column
-    for json_entry in list_data:
-        json_data = eval(json_entry)  # Convert the string to a dictionary
-        bike_brands.append(json_data.get("Bike brand", ""))
-        bike_models.append(json_data.get("Bike model", ""))
-        wheels.append(json_data.get("Wheels", ""))
-        gears.append(json_data.get("Gears", ""))
-        speeds.append(json_data.get("Speeds", ""))
-        tyres.append(json_data.get("Tyres", ""))
-        tyre_sizes.append(json_data.get("Size Tyre", ""))
-        lights.append(json_data.get("Lights", ""))
+    # Iterate through the list of dictionaries
+    for bike_info in list_data:
+        # Extract information from the 'bike_text' field
+        bike_text = bike_info['bike_text']
+        
+        # Extract information from the 'output' field (formatted as JSON)
+        output_info = eval(bike_info['output'])
 
-    df = pd.DataFrame({
-        'bike_brand': bike_brands,
-        'bike_model': bike_models,
+        # Append information to respective lists
+        bike_texts.append(bike_text)
+        bike_brand.append(output_info.get("Bike brand", ""))
+        bike_models.append(output_info.get("Bike model", ""))
+        wheels.append(output_info.get("Wheels", ""))
+        gears.append(output_info.get("Gears", ""))
+        speeds.append(output_info.get("Speeds", ""))
+        tyres.append(output_info.get("Tyres", ""))
+        tyre_sizes.append(output_info.get("Size Tyre", ""))
+        lights.append(output_info.get("Lights", ""))
+
+    # Create a DataFrame from the lists
+    bike_df = pd.DataFrame({
+        'bike_text': bike_texts,
+        'bike_brand': bike_brand,
+        'bike_models': bike_models,
         'wheels': wheels,
         'gears': gears,
         'speeds': speeds,
         'tyres': tyres,
-        'tyre_size': tyre_sizes,
+        'tyre_sizes': tyre_sizes,
         'lights': lights
     })
 
-    return df   
+    return bike_df

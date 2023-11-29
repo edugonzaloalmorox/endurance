@@ -63,14 +63,19 @@ def process_single_bike(bike_text):
     if output_content.lower() == 'no info':
         raise ValueError(f"No information available for bike: {bike_text}")
 
-    return output_content
+    result_dict = {
+        "bike_text": bike_text,
+        "output": output_content
+    }
+    
+    return result_dict
     
     
     
 
 def process_bike_info_test_parallel(bike_list, race_to_filter=None):
     # Create a directory to save the results
-    save_directory = 'data/input/results'
+    save_directory = 'data/test_inputs'
     os.makedirs(save_directory, exist_ok=True)
 
     responses_list = []
@@ -85,7 +90,7 @@ def process_bike_info_test_parallel(bike_list, race_to_filter=None):
             for i in range(0, len(results), chunk_size):
                 chunk = results[i:i + chunk_size]
                 file_num = i // chunk_size + 1
-                file_path = os.path.join(save_directory, f'data/input/results_{file_num}.json')
+                file_path = os.path.join(save_directory, f'results_{file_num}.json')
                 with open(file_path, 'w') as f:
                     json.dump(chunk, f)
 
@@ -93,9 +98,10 @@ def process_bike_info_test_parallel(bike_list, race_to_filter=None):
         except ValueError as e:
             print(f"Caught an exception: {e}")
     
-    cleaned_data = [item.replace('\n', '') for item in responses_list]
-    cleaned_data = [item.replace('```', '') for item in cleaned_data]
-    cleaned_data = [item.replace('json', '') for item in cleaned_data]
+
+    # Clean the responses
+    cleaned_data = [{"bike_text": item["bike_text"], "output": item["output"].replace('\n', '').replace('```', '').replace('json', '')} for item in responses_list]
+
 
     return cleaned_data
 
@@ -124,13 +130,13 @@ def run_in_batches(bike_list, batch_size=25):
 
 
 
-def process_and_save_results(list_to_subset, batch_size, start_index, end_index):
+def process_and_save_results(list_to_subset, batch_size, start_index, end_index, save_path):
     
     bikes_subset = list_to_subset[start_index:end_index]
     
     output_results = run_in_batches(bikes_subset, batch_size)
     
-    output_file_path = f'data/input/results/output_results_{start_index}{end_index}.json'
+    output_file_path = f'{save_path}/output_results_{start_index}{end_index}.json'
     
     with open(output_file_path, 'w') as f:
         json.dump(output_results, f)    
@@ -141,15 +147,23 @@ def process_and_save_results(list_to_subset, batch_size, start_index, end_index)
 
 print('Processing completions...')
 
+def get_list_of_bikes(df, input_path):
+    df = pd.read_csv(f'{input_path}/{df}.csv')
+    bike_list = df['bike'].tolist()
+    return bike_list
 
-bike_list = df_2023['bike'].tolist()
+
+save_path = 'data/test_inputs'
+bike_list = get_list_of_bikes('different_results', 'data/processed')
 batch_size = 25
+print(bike_list[0:5])
+
 
 # Set the desired range of indices
-start_index = 2101
-end_index = 2210
+start_index = 0
+end_index = len(bike_list)
 
-process_and_save_results(bike_list, batch_size, start_index, end_index)
+process_and_save_results(bike_list, batch_size, start_index, end_index, save_path)
 
 print('Done!')
 
